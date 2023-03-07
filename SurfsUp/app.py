@@ -25,7 +25,6 @@ app = Flask(__name__)
 # Routes
 @app.route("/")
 def home():
-    """List all available api routes."""
     return (
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
@@ -38,7 +37,6 @@ def home():
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
-    """Return a dictionary of date:prcp for the last 12 months of data"""
     # 1 year ago from the last data point 
     latest_date = session.query(func.max(Measurement.date)).scalar()
     one_year_ago = (dt.datetime.strptime(latest_date, '%Y-%m-%d') - dt.timedelta(days=365)).strftime('%Y-%m-%d')
