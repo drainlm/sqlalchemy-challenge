@@ -22,7 +22,7 @@ session = Session(bind=engine) # create a session object
 # Flask setup
 app = Flask(__name__)
 
-# Flask routes
+# Routes
 @app.route("/")
 def home():
     """List all available api routes."""
@@ -39,15 +39,15 @@ def home():
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     """Return a dictionary of date:prcp for the last 12 months of data"""
-    # Calculate the date 1 year ago from the last data point in the database
+    # 1 year ago from the last data point 
     latest_date = session.query(func.max(Measurement.date)).scalar()
     one_year_ago = (dt.datetime.strptime(latest_date, '%Y-%m-%d') - dt.timedelta(days=365)).strftime('%Y-%m-%d')
-    # Query the last 12 months of precipitation data
+    # Query last 12 months of precipitation
     results = session.query(Measurement.date, Measurement.prcp)\
                      .filter(Measurement.date >= one_year_ago)\
                      .order_by(Measurement.date).all()
     session.close()
-    # Convert the query results to a dictionary
+    # Convert to dictionary
     prcp_dict = {}
     for date, prcp in results:
         prcp_dict[date] = prcp
@@ -58,10 +58,10 @@ def stations():
     # Query all stations
     results = session.query(Station.station).all()
 
-    # Convert list of tuples into normal list
+    # Convert list 
     stations = list(np.ravel(results))
 
-    # Return a JSON list of stations
+    # JSON list of stations
     return jsonify(stations)
 
 @app.route("/api/v1.0/tobs")
@@ -71,7 +71,7 @@ def tobs():
         group_by(Measurement.station).\
         order_by(func.count(Measurement.station).desc()).first()
 
-    # Calculate the date one year ago from the last data point
+    # 1 year ago from the last data point
     latest_date = session.query(Measurement.date).\
         filter(Measurement.station == most_active_station[0]).\
         order_by(Measurement.date.desc()).first()
@@ -79,17 +79,17 @@ def tobs():
     latest_date = dt.datetime.strptime(latest_date[0], "%Y-%m-%d")
     one_year_ago = latest_date - dt.timedelta(days=365)
 
-    # Query the temperature observations of the most active station for the last year
+    # Query the temperature obs in most active station for the last year
     results = session.query(Measurement.date, Measurement.tobs).\
         filter(Measurement.station == most_active_station[0]).\
         filter(Measurement.date >= one_year_ago).all()
 
-    # Convert the query results to a dictionary
+    # Convert to dictionary
     tobs_dict = {}
     for result in results:
         tobs_dict[result[0]] = result[1]
 
-    # Return the JSON representation of the dictionary
+    # JSON tobs dictionary
     return jsonify(tobs_dict)
 
 @app.route("/api/v1.0/<start>")
@@ -101,10 +101,10 @@ def start_date(start):
         .filter(Measurement.date >= start_date)\
         .all()
 
-    # Create a dictionary with the results
+    # Create a dictionary 
     temp_dict = {'TMIN': results[0][0], 'TAVG': round(results[0][1], 2), 'TMAX': results[0][2]}
 
-    # Return the JSON representation of the dictionary
+    # JSON temp dictionary
     return jsonify(temp_dict)
 
 
